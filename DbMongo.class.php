@@ -33,31 +33,40 @@ class DbMongo{
 		$host = array();
 		$db_config = array(
 			  'dbms'      =>  'MongoDB',
-			  'username'  =>  isset($config['db_user']) ? $config['db_user'] : '',
-			  'password'  =>  isset($config['db_pwd']) ? $config['db_pwd'] : '',
-			  'hostname'  =>  isset($config['db_host']) ? (is_array($config['db_host']) && count($config['db_host']) ? $config['db_host'] : ($config['db_host'] !='' ? $config['db_host'] : '127.0.0.1')) : '127.0.0.1',
-			  'hostport'  =>  isset($config['db_port']) ? $config['db_port'] : 27017,
+			  'username'  =>  isset($config['db_user']) ? $config['db_user'] : 'user',
+			  'password'  =>  isset($config['db_pwd']) ? $config['db_pwd'] : 'password',
+			  'hostname'  =>  isset($config['db_host']) ? $config['db_host'] : '127.0.0.1',
 			  'database'  =>  isset($config['db_name']) && $config['db_name'] !='' ? $config['db_name'] : 'admin'
 		);
 		if($db_config['username'] && $db_config['password']){
 			$auth = $db_config['username'] . ':' . $db_config['password'] . '@';
 		}
-		if(is_string($db_config['hostname']) && false !== strpos($db_config['hostname'] ,',')){
-			$db_config['hostname']   =  explode(',',$db_config['hostname']);
-		}
-		if(is_array($db_config['hostname'])){
-			foreach($db_config['hostname'] as $key => $ip){
-				$host[] = $ip . ':' . (isset($db_config['hostport'][$key]) ? $db_config['hostport'][$key] : (isset($db_config['hostport'][0]) ? $db_config['hostport'][0] : 27017)) ;
-			}
-		}else{
-			$host[] = ($db_config['hostname'] !='' ? $db_config['hostname'] : '127.0.0.1') . ':' . (isset($db_config['hostport'][0]) ? $db_config['hostport'][0] :($db_config['hostport'] !='' ? $db_config['hostport'] : 27017));
-		}
-		$host = 'mongodb://' . $auth . implode(',' , $host);
+		$host = 'mongodb://' . $auth . $db_config['hostname'] . '/' . $db_config['database'];
         try{
 			$this->_mongo = new MongoClient($host);
 			$this->_dbName = $db_config['database'];
 		}catch(MongoConnectionException $e){
 		}
+    }
+	
+	function __destruct()
+    {
+		try{
+			$this->_mongo->close();
+		}catch(MongoException $e){
+		}
+    }
+    /**
+     * 判断是否连接成功
+     * @collection  string 数据集名称
+     * @author     yangzongqiang@dangdang.com       
+     */
+    public function isConnected(){
+        if ($this->_mongo){
+            return true;
+        }else{
+            return false;
+        }
     }
 	
 	/**
@@ -328,27 +337,36 @@ class DbMongo{
         if(is_array($val)) {
             if(is_string($val[0])) {
                 $con  =  strtolower($val[0]);
+                $data_type = isset($val[2]) ? strtolower($val[2]) : '';
                 if(in_array($con,array('neq','ne','gt','egt','gte','lt','lte','elt'))) { // 比较运算
                     $k = '$'.$this->comparison[$con];
+                    $val[1] = $this->data_type_convert($data_type,$val[1]);                // 数据类型转换
                     $query[$key]  =  array($k=>$val[1]);
                 }elseif('like'== $con){ // 模糊查询 采用正则方式
+                    $val[1] = $this->data_type_convert($data_type,$val[1]);                // 数据类型转换
                     $query[$key]  =  new MongoRegex('/' . $val[1] . '/');  
                 }elseif('mod'==$con){ // mod 查询
+                    $val[1] = $this->data_type_convert($data_type,$val[1]);                // 数据类型转换
                     $query[$key]   =  array('$mod'=>$val[1]);
                 }elseif('regex'==$con){ // 正则查询
+                    $val[1] = $this->data_type_convert($data_type,$val[1]);                // 数据类型转换
                     $query[$key]  =  new MongoRegex($val[1]);
                 }elseif(in_array($con,array('in','nin','not in'))){ // IN NIN 运算
                     $data = is_string($val[1])? explode(',',$val[1]):$val[1];
+                    $data = $this->data_type_convert($data_type,$data);                    // 数据类型转换
                     $k = '$'.$this->comparison[$con];
                     $query[$key]  =  array($k=>$data);
                 }elseif('all'==$con){ // 满足所有指定条件
                     $data = is_string($val[1])? explode(',',$val[1]):$val[1];
+                    $data = $this->data_type_convert($data_type,$data);                    // 数据类型转换
                     $query[$key]  =  array('$all'=>$data);
                 }elseif('between'==$con){ // BETWEEN运算
                     $data = is_string($val[1])? explode(',',$val[1]):$val[1];
+                    $data = $this->data_type_convert($data_type,$data);                    // 数据类型转换
                     $query[$key]  =  array('$gte'=>$data[0],'$lte'=>$data[1]);
                 }elseif('not between'==$con){
                     $data = is_string($val[1])? explode(',',$val[1]):$val[1];
+                    $data = $this->data_type_convert($data_type,$data);                    // 数据类型转换
                     $query[$key]  =  array('$lt'=>$data[0],'$gt'=>$data[1]);
                 }elseif('exp'==$con){ // 表达式查询
                     $query['$where']  = new MongoCode($val[1]);
@@ -367,6 +385,49 @@ class DbMongo{
         $query[$key]  =  $val;
         return $query;
     }
+    /**
+     * 数据类型转换
+     * @access private
+     * @param str  $data_type
+     * @param mixed  $target
+     * @return mixed
+     */
+    private function data_type_convert($data_type,$target) {
+        switch($data_type){
+            case 'int':
+                if(is_array($target)){
+                    foreach($target as $key => $val){
+                        $target[$key] = intval($val);
+                    }
+                }else{
+                    $target = intval($target);
+                }
+                break;
+            case 'str':
+                if(is_array($target)){
+                    foreach($target as $key => $val){
+                        $target[$key] = strval($val);
+                    }
+                }else{
+                    $target = strval($target);
+                }
+                break;
+            case 'float':
+                if(is_array($target)){
+                    foreach($target as $key => $val){
+                        $target[$key] = floatval($val);
+                    }
+                }else{
+                    $target = floatval($target);
+                }
+                break;
+            default:
+                break;
+        }
+        return $target;
+    }
+
+
 	/**
      * order分析
      * @access private
