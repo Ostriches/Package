@@ -23,7 +23,7 @@ class DbMongo{
     protected $_collection      =   null; // MongoCollection Object
     protected $_dbName          =   ''; // dbName
     protected $comparison       =   array('neq'=>'ne','ne'=>'ne','gt'=>'gt','egt'=>'gte','gte'=>'gte','lt'=>'lt','elt'=>'lte','lte'=>'lte','in'=>'in','not in'=>'nin','nin'=>'nin');
-	/**
+    /**
      * 构造函数 读取数据库配置信息
      * @access public
      * @param array $config 数据库配置数组
@@ -48,8 +48,11 @@ class DbMongo{
 		}catch(MongoConnectionException $e){
 		}
     }
-	
-	function __destruct()
+    /**
+     * 析构函数
+     * @author     yangzongqiang 
+     */	
+    function __destruct()
     {
 		try{
 			$this->_mongo->close();
@@ -59,7 +62,7 @@ class DbMongo{
     /**
      * 判断是否连接成功
      * @collection  string 数据集名称
-     * @author     yangzongqiang@dangdang.com       
+     * @author     yangzongqiang      
      */
     public function isConnected(){
         if ($this->_mongo){
@@ -69,10 +72,10 @@ class DbMongo{
         }
     }
 	
-	/**
+    /**
      * 选择数据集
      * @collection  string 数据集名称
-     * @author     yangzongqiang@dangdang.com     	
+     * @author     yangzongqiang   	
      */
     public function switchCollection($collection)
     {
@@ -82,7 +85,7 @@ class DbMongo{
 		}
     }
 	
-	/**
+    /**
      * 插入记录
      * @access public
      * @param mixed $data 数据
@@ -186,7 +189,7 @@ class DbMongo{
         }
     }
 	
-	/**
+    /**
      * 查找记录
      * @access public
      * @param array $options 表达式
@@ -229,7 +232,7 @@ class DbMongo{
         }
     }
 	
-	/**
+    /**
      * 统计记录数
      * @access public
      * @param array $options 表达式
@@ -244,7 +247,7 @@ class DbMongo{
         }
     } 
 	
-	/**
+    /**
      * field分析
      * @access private
      * @param mixed $fields
@@ -260,7 +263,7 @@ class DbMongo{
         return $fields;
     }
 	
-	/**
+    /**
      * where分析
      * @access protected
      * @param mixed $where
@@ -428,7 +431,7 @@ class DbMongo{
     }
 
 
-	/**
+    /**
      * order分析
      * @access private
      * @param mixed $order
