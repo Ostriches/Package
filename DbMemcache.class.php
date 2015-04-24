@@ -2,22 +2,22 @@
 
 class DbMemcache
 {
-	//ÊÇ·ñ¿ªÆômemcachedÀ©Õ¹
+	//æ˜¯å¦å¼€å¯memcachedæ‰©å±•
 	private $memcachedEnable;
 	/**
-	 * µ¥¼ş·½·¨ÊµÏÖ
+	 * å•ä»¶æ–¹æ³•å®ç°
 	 * @var instance
 	 */
 	private static $instance;
 	
 	/**
-	 * Á¬½Ó×ÊÔ´
+	 * è¿æ¥èµ„æº
 	 * @var mc
 	 */
 	private $mc = null;
 	
 	private function __construct($servers, $multi = false) {
-		//À©Õ¹ÅĞ¶Ï
+		//æ‰©å±•åˆ¤æ–­
 		$this->memcachedEnable = extension_loaded('Memcached');
 
 		if($this->memcachedEnable) {
@@ -30,13 +30,13 @@ class DbMemcache
 			} else {
 				$this->mc->addServer($servers['host'], $servers['port'], $servers['weight']);
 			} 		
-			//»·ĞÎ¹şÏ£Ëã·¨(libketama)
+			//ç¯å½¢å“ˆå¸Œç®—æ³•(libketama)
 			$this->mc->setOption(Memcached::OPT_LIBKETAMA_COMPATIBLE, true);
-			//ÉèÖÃ·Ç×èÈû´«ÊäÄ£Ê½
+			//è®¾ç½®éé˜»å¡ä¼ è¾“æ¨¡å¼
 			$this->mc->setOption(Memcached::OPT_NO_BLOCK, true);
-			//ÉèÖÃÁ¬½Ó³¬Ê±
+			//è®¾ç½®è¿æ¥è¶…æ—¶
 			$this->mc->setOption(Memcached::OPT_CONNECT_TIMEOUT, 200);
-			//ÉèÖÃPOLL³¬Ê±
+			//è®¾ç½®POLLè¶…æ—¶
 			$this->mc->setOption(Memcached::OPT_POLL_TIMEOUT, 50);		
 		}else{
 			$this->mc = new Memcache();			
@@ -46,9 +46,9 @@ class DbMemcache
 	}
 	
 	/**
-	 * µ¥¼ş·½·¨
+	 * å•ä»¶æ–¹æ³•
 	 * @param string $alias
-	 * @param boolean $multi ÊÇ·ñ¶àÌ¨
+	 * @param boolean $multi æ˜¯å¦å¤šå°
 	 * @return instance|MC
 	 */
 	public static function Instance($servers, $multi = false) {
@@ -59,8 +59,8 @@ class DbMemcache
 		return self::$instance[$instanceKey] = new self($servers, $multi = false);
 	}
 	/**
-	 * Îö¹¹º¯Êı
-	 * ¹Ø±ÕÁ¬½Ó
+	 * ææ„å‡½æ•°
+	 * å…³é—­è¿æ¥
 	 */
 	function __destruct()
     {
@@ -77,7 +77,7 @@ class DbMemcache
     }
 	
 	/**
-	 * ÉèÖÃ»º´æÖµ(searilizeÖµ)
+	 * è®¾ç½®ç¼“å­˜å€¼(searilizeå€¼)
 	 * @param string $key
 	 * @param mixed $value
 	 * @param int $expireTime
@@ -87,7 +87,7 @@ class DbMemcache
 		return $this->mc->set($key, $value, $expireTime);
 	}
 	/**
-	 * Ò»´ÎÉèÖÃ¶à¸öÖµ(key => value)¼üÖµ¶Ô
+	 * ä¸€æ¬¡è®¾ç½®å¤šä¸ªå€¼(key => value)é”®å€¼å¯¹
 	 * @param array $items
 	 * @param int $expireTime
 	 * @return boolean
@@ -96,7 +96,7 @@ class DbMemcache
 		return $this->mc->setMulti($items, $expireTime);
 	}
 	/**
-	 * »ñÈ¡»º´æÖµ(unsearilizeÖµ)
+	 * è·å–ç¼“å­˜å€¼(unsearilizeå€¼)
 	 * @param string $key
 	 * @return mixed
 	 */
@@ -104,7 +104,7 @@ class DbMemcache
 		return $this->mc->get($key);
 	}
 	/**
-	 * »ñÈ¡»º´æÖµ(unsearilizeÖµ)
+	 * è·å–ç¼“å­˜å€¼(unsearilizeå€¼)
 	 * @param array $keys
 	 * @return mixed
 	 */
@@ -112,7 +112,7 @@ class DbMemcache
 		return $this->mc->getMulti($keys);
 	}
 	/**
-	 * ÒªÉ¾³ıµÄ¼üÖµ
+	 * è¦åˆ é™¤çš„é”®å€¼
 	 * @param string $key
 	 * @return boolean
 	 */
@@ -121,7 +121,7 @@ class DbMemcache
 	}
 	
 	/**
-     * Çå³ı»º´æ
+     * æ¸…é™¤ç¼“å­˜
      * @access public
      * @return boolen
      */
