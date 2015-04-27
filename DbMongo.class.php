@@ -48,9 +48,9 @@ class DbMongo{
 		}catch(MongoConnectionException $e){
 		}
     }
+	
     /**
      * 析构函数
-     * @author     yangzongqiang 
      */	
     function __destruct()
     {
@@ -59,10 +59,10 @@ class DbMongo{
 		}catch(MongoException $e){
 		}
     }
+	
     /**
      * 判断是否连接成功
      * @collection  string 数据集名称
-     * @author     yangzongqiang      
      */
     public function isConnected(){
         if ($this->_mongo){
@@ -75,7 +75,6 @@ class DbMongo{
     /**
      * 选择数据集
      * @collection  string 数据集名称
-     * @author     yangzongqiang   	
      */
     public function switchCollection($collection)
     {

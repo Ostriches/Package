@@ -1,16 +1,15 @@
 <?php
 /**Memcache封装类(单例模式)
- * 1、获取资源: $mem = DbMemcache::getInstance($config),其中$config是数据库配置信息
+ * 1、获取资源: $redis = DbMemcache::getInstance($config),其中$config是数据库配置信息
  * =========config配置信息=========
  * host:服务器
  * port: 端口
  * ===============================
- * 2、设置缓存：$return = $mem->set($key, $value, $expireTime=0);其中$key为键值，$value为对应的数据，$expireTime为缓存有效时间
- * 3、同时设置多个缓存：$return = $mem->setMulti($items, $expireTime);其中items是缓存的数组（array(key => value)），$expireTime为缓存有效时间
- * 4、获取缓存数据：$return = $mem->get($key);其中$key是键值
- * 5、获取多个缓存数据：$return = $mem->getMulti($keys);其中$keys是键值数组
- * 6、按条件删除记录：$return = $mem->delete($key)，key为键值
- * 7、清空整个缓存：$return = $mem->clear()
+ * 2、设置数据库：$return = $redis->selectDB($DB_number);其中$DB_number为数据库ID
+ * 3、设置缓存：$return = $redis->set($key, $value, $timeOut=0);其中$key为键值，$value为对应的数据，$timeOut为缓存有效时间
+ * 4、获取缓存数据：$return = $redis->get($key);其中$key是键值
+ * 5、按条件删除记录：$return = $redis->delete($key)，key为键值
+ * 6、清空整个缓存：$return = $redis->flushAll()
  */
  
 class DdRedis { 
