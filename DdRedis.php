@@ -4,7 +4,6 @@
  * =========config配置信息=========
  * host:服务器
  * port: 端口
- * weight:权重
  * ===============================
  * 2、设置缓存：$return = $mem->set($key, $value, $expireTime=0);其中$key为键值，$value为对应的数据，$expireTime为缓存有效时间
  * 3、同时设置多个缓存：$return = $mem->setMulti($items, $expireTime);其中items是缓存的数组（array(key => value)），$expireTime为缓存有效时间
