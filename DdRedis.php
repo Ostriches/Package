@@ -1,7 +1,22 @@
 <?php
+/**Memcache封装类(单例模式)
+ * 1、获取资源: $mem = DbMemcache::getInstance($config),其中$config是数据库配置信息
+ * =========config配置信息=========
+ * host:服务器
+ * port: 端口
+ * weight:权重
+ * ===============================
+ * 2、设置缓存：$return = $mem->set($key, $value, $expireTime=0);其中$key为键值，$value为对应的数据，$expireTime为缓存有效时间
+ * 3、同时设置多个缓存：$return = $mem->setMulti($items, $expireTime);其中items是缓存的数组（array(key => value)），$expireTime为缓存有效时间
+ * 4、获取缓存数据：$return = $mem->get($key);其中$key是键值
+ * 5、获取多个缓存数据：$return = $mem->getMulti($keys);其中$keys是键值数组
+ * 6、按条件删除记录：$return = $mem->delete($key)，key为键值
+ * 7、清空整个缓存：$return = $mem->clear()
+ */
+ 
 class DdRedis { 
 
-    private $redis; //redis对象 
+    private $redis = null; //redis对象 
 	/**
 	 * 单件方法实现
 	 * @var instance
@@ -12,18 +27,32 @@ class DdRedis {
      * 简单处理,
      * @param array $config 
      */ 
-    public function __construct($config = array()) {
-        $redis_conn = empty($config) ? array('server' => '127.0.0.1', 'port' => '6379', 'index' => 0) : $config;
+    private function __construct($config = array()) {
+        $redis_conn = empty($config) ? array('server' => '127.0.0.1', 'port' => '6379') : $config;
         $this->redis = new Redis();
         try {
             $rc = $this->redis->connect($redis_conn['server'], $redis_conn['port']);
             if (!$rc) {
             	throw new Exception('redis connect failed host:'.$redis_conn['server'].' port:'.$redis_conn['port']);
             }
-        } catch (Exception $e) {
+        } catch (RedisException $e) {
 		
         }
         return $this->redis;
+    }
+	
+	/**
+	 * 析构函数
+	 * 关闭连接
+	 */
+	function __destruct()
+    {
+		try{
+			if(!is_null($this->redis)){
+				$this->redis->close();
+			}
+		}catch(RedisException $e){
+		}
     }
      
 	/**
@@ -39,6 +68,30 @@ class DdRedis {
 		}
 		return self::$instance[$instanceKey] = new self($config);
 	}
+	
+	/**
+	 * 更换数据库ID
+	 * @param string $DB_number
+	 * @return boolean
+	 */
+	public function selectDB($DB_number)
+    {
+        try
+        {
+			if(!is_null($this->redis)){
+				if($DB_number == 0){
+					return true;
+				}
+				return $this->redis->select($DB_number);
+			}
+			
+			return false;
+        }
+        catch (RedisException $e)
+        {
+            return false;
+        }
+    }
 	
     /** 
      * 设置值 
@@ -127,15 +180,19 @@ class DdRedis {
     public function close(){
         return $this->redis->close();
     }
+	
     public function hkeys($key){
     	return $this->redis->hKeys($key);
     }
+	
     public function hset($key, $field, $value){
     	return $this->redis->hSet($key, $field, $value);
     }
+	
     public function hget($key, $field){
     	return $this->redis->hGet($key, $field);
     }
+	
     public function hdel($key, $field){
     	return $this->redis->hDel($key, $field);
     }

@@ -1,6 +1,6 @@
 <?php
 /**Memcache封装类(单例模式)
- * 1、获取资源: $mem = DbMemcache::getInstance($config),其中$config是数据库配置信息
+ * 1、获取资源: $mem = DbMemcache::getInstance($config,$multi),其中$config是数据库配置信息
  * =========config配置信息=========
  * host:服务器
  * port: 端口
@@ -71,6 +71,7 @@ class DbMemcache
 		}
 		return self::$instance[$instanceKey] = new self($servers, $multi = false);
 	}
+	
 	/**
 	 * 析构函数
 	 * 关闭连接
@@ -99,6 +100,7 @@ class DbMemcache
 	public function set($key, $value, $expireTime=0) {
 		return $this->mc->set($key, $value, $expireTime);
 	}
+	
 	/**
 	 * 一次设置多个值(key => value)键值对
 	 * @param array $items
@@ -108,6 +110,7 @@ class DbMemcache
 	public function setMulti($items, $expireTime) {
 		return $this->mc->setMulti($items, $expireTime);
 	}
+	
 	/**
 	 * 获取缓存值(unsearilize值)
 	 * @param string $key
@@ -116,6 +119,7 @@ class DbMemcache
 	public function get($key) {
 		return $this->mc->get($key);
 	}
+	
 	/**
 	 * 获取缓存值(unsearilize值)
 	 * @param array $keys
@@ -124,6 +128,7 @@ class DbMemcache
 	public function getMulti($keys = array()) {
 		return $this->mc->getMulti($keys);
 	}
+	
 	/**
 	 * 要删除的键值
 	 * @param string $key
