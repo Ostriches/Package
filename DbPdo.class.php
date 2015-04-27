@@ -1,18 +1,13 @@
 <?php
-/**
- * Project:     Library classes
- * File:        DbPdo.php
- *
- * 获取DB资源   : $db = DbPdo::Instance($alias);
- *
- * $res = $db->add($table, $column); //插入单条记录
- * $res = $db->query($sql, $params); //查询多条记录
- * $res = $db->one($sql, $params); //查询单条记录
- * $db->startTrans();   //支持事务，注意:事务对数据表使用的引擎有关系，使用的时候请检查表的引擎
- * $res = $db->exec();//支持直接执行语句/返回PDOStatement对象
+/**Pdo封装类(单例模式)
+ * 1、获取DB资源   : $db = DbPdo::Instance($alias);
+ * 2、$res = $db->add($table, $column); //插入单条记录
+ * 3、$res = $db->query($sql, $params); //查询多条记录
+ * 4、$res = $db->one($sql, $params); //查询单条记录
+ * 5、$db->startTrans();   //支持事务，注意:事务对数据表使用的引擎有关系，使用的时候请检查表的引擎
+ * 6、$res = $db->exec();//支持直接执行语句/返回PDOStatement对象
  * @link
  * @copyright 	2015
- * @author 		yangzongqiang <wisoch at hotmail dot com>
  */
 
 final class DbPdo {
@@ -272,10 +267,12 @@ final class DbPdo {
 	 * 日志记录
 	 * @access private
 	 * @return void
-	 * @author yangzongqiang@dangdang.com
 	 */
 	private function logErr($func,$e,$lines = "\n")
 	{
+		if(!defined('__LOG__')){
+			define('__LOG__', dirname(__FILE__) . '/log');
+		}
 		$file = __LOG__ . '/pdo' . date('Ymd') . '.log';
 		$inPutTime = time();
 		if(!is_string($e)){
