@@ -8,6 +8,7 @@
  * 6、$res = $db->exec();//支持直接执行语句/返回PDOStatement对象
  * @link
  * @copyright 	2015
+ * 
  */
 
 final class DbPdo {
